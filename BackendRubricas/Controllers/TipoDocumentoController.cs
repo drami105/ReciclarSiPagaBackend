@@ -30,7 +30,7 @@ namespace BackendRubricas.Controllers
             return await _context.tipoDocumento.ToListAsync();
         }
 
-        // GET: api/Categorias/5
+        // GET: api/Categorias/ID
         [HttpGet("{id}")]
         public async Task<ActionResult<TipoDocumento>> GetTipoDocumento(int id)
         {
