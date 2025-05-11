@@ -1,4 +1,5 @@
-﻿using BackendRubricas.Models;
+﻿using BackendReciclarsipaga.Models;
+using BackendRubricas.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendRubricas.Context
@@ -19,6 +20,8 @@ namespace BackendRubricas.Context
         }
 
         public DbSet<TipoDocumento> tipoDocumento { get; set; }
+        public DbSet<Ciudad> ciudad { get; set; }
+        public DbSet<Barrio> barrio { get; set; }
 
     }
 

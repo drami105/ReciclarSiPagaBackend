@@ -85,7 +85,7 @@ namespace BackendRubricas
         {
             app.UseCors(options =>
             {
-                options.WithOrigins("https://rubricasweb.azurewebsites.net");
+                options.WithOrigins("http://localhost:4200");
                 options.AllowAnyMethod();
                 options.AllowAnyHeader();
             });
