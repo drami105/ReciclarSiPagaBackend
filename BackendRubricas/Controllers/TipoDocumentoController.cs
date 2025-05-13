@@ -57,7 +57,7 @@ namespace BackendRubricas.Controllers
 
             _context.Entry(tipoDocumento).State = EntityState.Modified;
 
-            if (TipoDocumentoExisDesc(tipoDocumento.Descripcion))
+            if (TipoDocumentoExisDesc(tipoDocumento.descripcion))
             {
                 return BadRequest("Ya existe tipo de documento con esta descripción");
             }
@@ -92,7 +92,7 @@ namespace BackendRubricas.Controllers
 
         private bool TipoDocumentoExisDesc(string tipoDocumento)
         {
-            return _context.tipoDocumento.Any(e => e.Descripcion == tipoDocumento);
+            return _context.tipoDocumento.Any(e => e.descripcion == tipoDocumento);
         }
     }
 }

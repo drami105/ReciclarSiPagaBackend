@@ -8,6 +8,6 @@ namespace BackendRubricas.Models
         public int idTipoDocumento { get; set; }
         [Required(ErrorMessage = "Categoria es obligatoria")]
         [StringLength(50)]
-        public string Descripcion { get; set; }
+        public string descripcion { get; set; }
     }
 }
