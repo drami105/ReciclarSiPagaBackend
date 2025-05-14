@@ -24,6 +24,13 @@ namespace BackendRubricas.Context
         public DbSet<Barrio> barrio { get; set; }
         public DbSet<Persona> persona { get; set; }
         public DbSet<Usuario> usuario { get; set; }
+        public DbSet<Recoleccion> recoleccion { get; set; }
+        public DbSet<RecoleccionDto> recoleccionDto { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<RecoleccionDto>().HasNoKey();
+        }
 
     }
 
