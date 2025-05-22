@@ -71,5 +71,18 @@ namespace BackendReciclarsipaga.Controllers
         }
 
 
+        // GET: api/Recoleccion/usuario/5
+        [HttpGet("usuario/{idUsuario}")]
+        public async Task<ActionResult<double>> GetKilogramosConfPorUsuario(long idUsuario)
+        {
+            var totalKg = await _context.recoleccion
+                .Where(r => r.idUsuario == idUsuario)
+                .SumAsync(r => (double?)r.kilogramosConf) ?? 0;
+
+            return Ok(totalKg);
+        }
+
+
+
     }
 }

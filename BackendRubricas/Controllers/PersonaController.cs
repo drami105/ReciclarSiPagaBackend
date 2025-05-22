@@ -27,6 +27,40 @@ namespace BackendReciclarsipaga.Controllers
             return await _context.persona.ToListAsync();
         }
 
+        // GET: api/Persona/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPersona(int id)
+        {
+            var personaConCiudad = await (
+                from persona in _context.persona
+                join barrio in _context.barrio on persona.idBarrio equals barrio.idBarrio
+                join ciudad in _context.ciudad on barrio.idCiudad equals ciudad.idCiudad
+                where persona.idPersona == id
+                select new
+                {
+                    persona.idPersona,
+                    persona.documento,
+                    persona.idTipoDocumento,
+                    persona.primerNombre,
+                    persona.segundoNombre,
+                    persona.primerApellido,
+                    persona.segundoApellido,
+                    persona.idBarrio,
+                    persona.direccion,
+                    persona.telefono,
+                    idCiudad = ciudad.idCiudad,
+                    descripcionCiudad = ciudad.descripcion
+                }
+            ).FirstOrDefaultAsync();
+
+            if (personaConCiudad == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(personaConCiudad);
+        }
+
 
         // POST: api/<PersonaController>
         [HttpPost()]
@@ -79,6 +113,86 @@ namespace BackendReciclarsipaga.Controllers
             }
         }
 
+        // PUT: api/Persona/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutPersona(int id, [FromBody] Persona persona)
+        {
+            if (id != persona.idPersona)
+            {
+                return BadRequest("El ID en la URL no coincide con el ID del cuerpo.");
+            }
+
+            var personaExistente = await _context.persona.FindAsync(id);
+            if (personaExistente == null)
+            {
+                return NotFound();
+            }
+
+            // Actualizar propiedades
+            personaExistente.direccion = persona.direccion;
+            personaExistente.idBarrio = persona.idBarrio;
+            personaExistente.telefono = persona.telefono;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.persona.Any(e => e.idPersona == id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent(); 
+        }
+
+        [HttpPut("{id}/{idPerfil}")]
+        public async Task<IActionResult> PutPersonaCompleto(int id, int idPerfil, [FromBody] Persona dto)
+        {
+            if (id != dto.idPersona)
+            {
+                return BadRequest("El ID en la URL no coincide con el ID del cuerpo.");
+            }
+
+            var personaExistente = await _context.persona.FindAsync(id);
+            if (personaExistente == null)
+            {
+                return NotFound("Persona no encontrada.");
+            }
+
+            // Buscar usuario relacionado
+            var usuarioExistente = await _context.usuario
+                .FirstOrDefaultAsync(u => u.idPersona == personaExistente.idPersona);
+
+            if (usuarioExistente == null)
+            {
+                return NotFound("Usuario no encontrado.");
+            }
+
+            // Actualizar propiedades de persona
+            personaExistente.primerNombre = dto.primerNombre;
+            personaExistente.segundoNombre = dto.segundoNombre;
+            personaExistente.primerApellido = dto.primerApellido;
+            personaExistente.segundoApellido = dto.segundoApellido;
+            personaExistente.direccion = dto.direccion;
+            personaExistente.documento = dto.documento;
+            personaExistente.telefono = dto.telefono;
+            personaExistente.correo = dto.correo;
+            personaExistente.idBarrio = dto.idBarrio;
+
+            // Actualizar perfil del usuario
+            usuarioExistente.idPerfil = idPerfil;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
 
 
         private bool DocumentoExist(int documento)

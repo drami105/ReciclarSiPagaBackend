@@ -54,6 +54,35 @@ namespace BackendReciclarsipaga.Controllers
             return Ok(resultado);
         }
 
+        // GET: api/Usuario/detalle
+        [HttpGet("detalle")]
+        public async Task<ActionResult> GetUsuariosConDetalle()
+        {
+            var usuarios = await (from u in _context.usuario
+                                  join p in _context.persona on u.idPersona equals p.idPersona
+                                  join r in _context.tipoDocumento on p.idTipoDocumento equals r.idTipoDocumento
+                                  select new
+                                  {
+                                      NombreCompleto = string.Join(" ", p.primerNombre, p.segundoNombre, p.primerApellido, p.segundoApellido).Trim(),
+                                      PrimerNombre = p.primerNombre,
+                                      SegundoNombre = p.segundoNombre,
+                                      PrimerApellido = p.primerApellido,
+                                      SegundoApellido = p.segundoNombre,
+                                      Direccion = p.direccion,
+                                      Documento = p.documento,
+                                      Telefono = p.telefono,
+                                      Correo = p.correo,
+                                      IdBarrio = p.idBarrio,
+                                      IdPerfil = u.idPerfil,
+                                      IdPersona = p.idPersona,
+                                      IdUsuario = u.idUsuario,
+                                      IdTipoDocumento = p.idTipoDocumento, 
+                                      TipoDocumento = r.descripcion
+                                  }).ToListAsync();
+
+            return Ok(usuarios);
+        }
+
 
     }
 }
