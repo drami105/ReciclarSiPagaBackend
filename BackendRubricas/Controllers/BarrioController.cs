@@ -1,11 +1,11 @@
 ﻿using BackendReciclarsipaga.Models;
+using BackendReciclarsipaga.Services;
 using BackendRubricas.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace BackendReciclarsipaga.Controllers
 {
@@ -13,20 +13,18 @@ namespace BackendReciclarsipaga.Controllers
     [ApiController]
     public class BarrioController : ControllerBase
     {
+        private readonly IBarrioService _barrioService;
 
-        private readonly AppDbContext _context;
-
-        public BarrioController(AppDbContext context)
+        public BarrioController(IBarrioService barrioService)
         {
-            _context = context;
+            _barrioService = barrioService;
         }
 
-        // GET: api/<BarrioController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Barrio>>> GetBarrio()
         {
-            return await _context.barrio.ToListAsync();
+            var barrios = await _barrioService.GetAllBarriosAsync();
+            return Ok(barrios);
         }
-
     }
 }

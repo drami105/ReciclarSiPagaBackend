@@ -1,98 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using BackendRubricas.Models;
+using BackendRubricas.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BackendRubricas.Context;
-using BackendRubricas.Models;
-using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BackendRubricas.Controllers
 {
-    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TipoDocumentoController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ITipoDocumentoService _service;
 
-        public TipoDocumentoController(AppDbContext context)
+        public TipoDocumentoController(ITipoDocumentoService service)
         {
-            _context = context;
+            _service = service;
         }
 
-        // GET: api/Categorias
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TipoDocumento>>> GetTipoDocumento()
         {
-            return await _context.tipoDocumento.ToListAsync();
+            var tipos = await _service.GetAllAsync();
+            return Ok(tipos);
         }
 
-        // GET: api/Categorias/ID
         [HttpGet("{id}")]
         public async Task<ActionResult<TipoDocumento>> GetTipoDocumento(int id)
         {
-            var tipoDocumento = await _context.tipoDocumento.FindAsync(id);
-
-            if (tipoDocumento == null)
-            {
+            var tipo = await _service.GetByIdAsync(id);
+            if (tipo == null)
                 return NotFound();
-            }
 
-            return tipoDocumento;
+            return Ok(tipo);
         }
 
-        // PUT: api/Categorias/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTipoDocumento(int id, TipoDocumento tipoDocumento)
         {
             if (id != tipoDocumento.idTipoDocumento)
-            {
                 return BadRequest();
-            }
 
-            _context.Entry(tipoDocumento).State = EntityState.Modified;
+            var success = await _service.UpdateAsync(id, tipoDocumento);
 
-            if (TipoDocumentoExisDesc(tipoDocumento.descripcion))
-            {
-                return BadRequest("Ya existe tipo de documento con esta descripción");
-            }
-            else
-            {
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TipoDocumentoExist(id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
+            if (!success)
+                return BadRequest("Error actualizando. Puede que el tipo no exista o la descripción esté duplicada.");
 
             return NoContent();
-        }
-
-
-
-        private bool TipoDocumentoExist(int id)
-        {
-            return _context.tipoDocumento.Any(e => e.idTipoDocumento == id);
-        }
-
-        private bool TipoDocumentoExisDesc(string tipoDocumento)
-        {
-            return _context.tipoDocumento.Any(e => e.descripcion == tipoDocumento);
         }
     }
 }

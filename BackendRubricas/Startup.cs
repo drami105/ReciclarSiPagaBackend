@@ -1,4 +1,6 @@
+using BackendReciclarsipaga.Services;
 using BackendRubricas.Context;
+using BackendRubricas.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -54,6 +56,14 @@ namespace BackendRubricas
             services.AddControllers();
             AddSwagger(services);
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Conexion")));
+            services.AddScoped<IBarrioService, BarrioService>();
+            services.AddScoped<ICiudadService, CiudadService>();
+            services.AddScoped<IPersonaService, PersonaService>();
+            services.AddScoped<IPuntosService, PuntosService>();
+            services.AddScoped<IRecoleccionService, RecoleccionService>();
+            services.AddScoped<ITipoDocumentoService, TipoDocumentoService>();
+            services.AddScoped<IUsuarioService, UsuarioService>();
+
 
         }
 

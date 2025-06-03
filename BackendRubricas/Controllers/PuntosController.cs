@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using BackendReciclarsipaga.Models;
+using BackendReciclarsipaga.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BackendRubricas.Context;
-using Microsoft.AspNetCore.Authorization;
-using BackendReciclarsipaga.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BackendReciclarsipaga.Controllers
 {
@@ -15,35 +10,50 @@ namespace BackendReciclarsipaga.Controllers
     [ApiController]
     public class PuntosController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IPuntosService _puntosService;
 
-        public PuntosController(AppDbContext context)
+        public PuntosController(IPuntosService puntosService)
         {
-            _context = context;
+            _puntosService = puntosService;
         }
 
-        // GET: api/Puntos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Puntos>>> GetPuntos()
         {
-            return await _context.puntos.ToListAsync();
+            var puntos = await _puntosService.GetAllAsync();
+            return Ok(puntos);
         }
 
-        // GET: api/Puntos/usuario/5
         [HttpGet("usuario/{idUsuario}")]
         public async Task<ActionResult<int>> GetPuntosPorUsuario(long idUsuario)
         {
-            var puntos = await _context.puntos
-                .Where(p => p.idUsuario == idUsuario)
-                .Select(p => p.puntos) 
-                .FirstOrDefaultAsync();
-
-            if (puntos == default)
-            {
+            var puntos = await _puntosService.GetPuntosPorUsuarioAsync(idUsuario);
+            if (puntos == null)
                 return NotFound();
-            }
 
             return Ok(puntos);
+        }
+
+        [HttpPost("agregar")]
+        public async Task<IActionResult> AgregarPuntos([FromBody] Puntos puntosDto)
+        {
+            var exito = await _puntosService.AgregarPuntosAsync(puntosDto.idUsuario, puntosDto.puntos);
+
+            if (!exito)
+                return NotFound($"Usuario con ID {puntosDto.idUsuario} no encontrado.");
+
+            return Ok(new { mensaje = "Puntos actualizados correctamente" });
+        }
+        
+        [HttpPost("disminuir")]
+        public async Task<IActionResult> DisminuirPuntos([FromBody] Puntos puntosDto)
+        {
+            var exito = await _puntosService.DisminuirPuntosAsync(puntosDto.idUsuario, puntosDto.puntos);
+
+            if (!exito)
+                return NotFound($"Usuario con ID {puntosDto.idUsuario} no encontrado.");
+
+            return Ok(new { mensaje = "Puntos actualizados correctamente" });
         }
 
 

@@ -1,35 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BackendRubricas.Context;
-using BackendRubricas.Models;
-using Microsoft.AspNetCore.Authorization;
 using BackendReciclarsipaga.Models;
+using BackendReciclarsipaga.Services;
 
 namespace BackendReciclarsipaga.Controllers
 {
     [Route("api/[controller]")]
-    //[ApiController]
+    [ApiController]
     public class CiudadController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICiudadService _ciudadService;
 
-        public CiudadController(AppDbContext context)
+        public CiudadController(ICiudadService ciudadService)
         {
-            _context = context;
+            _ciudadService = ciudadService;
         }
 
-
-        // GET: api/<CiudadController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Ciudad>>> GetCiudad()
         {
-            return await _context.ciudad.ToListAsync();
+            var ciudades = await _ciudadService.GetAllCiudadesAsync();
+            return Ok(ciudades);
         }
-
     }
 }

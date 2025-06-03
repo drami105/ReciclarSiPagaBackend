@@ -1,11 +1,8 @@
 ﻿using BackendReciclarsipaga.Models;
-using BackendRubricas.Context;
+using BackendReciclarsipaga.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-
 
 namespace BackendReciclarsipaga.Controllers
 {
@@ -13,76 +10,35 @@ namespace BackendReciclarsipaga.Controllers
     [ApiController]
     public class UsuarioController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUsuarioService _usuarioService;
 
-        public UsuarioController(AppDbContext context)
+        public UsuarioController(IUsuarioService usuarioService)
         {
-            _context = context;
+            _usuarioService = usuarioService;
         }
 
-        // GET: api/<UsuarioController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuario()
-        { 
-            return await _context.usuario.ToListAsync();
+        {
+            var usuarios = await _usuarioService.GetAllUsuariosAsync();
+            return Ok(usuarios);
         }
 
-        // POST: api/<UsuarioController>
         [HttpPost("Autenticacion")]
-        public IActionResult Autenticacion([FromBody] LoginDto login)
+        public async Task<IActionResult> Autenticacion([FromBody] LoginDto login)
         {
-            var resultado = (from u in _context.usuario
-                             join p in _context.persona on u.idPersona equals p.idPersona
-                             where p.correo == login.Correo && u.contrasena == login.Contrasena
-                             select new
-                             {
-                                 NombreCompleto = string.Join(" ", p.primerNombre, p.segundoNombre, p.primerApellido, p.segundoApellido).Trim(),
-                                 Direccion = p.direccion,
-                                 Documento = p.documento,
-                                 Telefono = p.telefono,
-                                 Correo = p.correo,
-                                 IdBarrio = p.idBarrio,
-                                 IdPerfil = u.idPerfil,
-                                 IdUsuario = p.idPersona
-                             }).FirstOrDefault();
-
+            var resultado = await _usuarioService.AutenticarAsync(login);
             if (resultado == null)
-            {
                 return Unauthorized("Credenciales inválidas.");
-            }
 
             return Ok(resultado);
         }
 
-        // GET: api/Usuario/detalle
         [HttpGet("detalle")]
-        public async Task<ActionResult> GetUsuariosConDetalle()
+        public async Task<IActionResult> GetUsuariosConDetalle()
         {
-            var usuarios = await (from u in _context.usuario
-                                  join p in _context.persona on u.idPersona equals p.idPersona
-                                  join r in _context.tipoDocumento on p.idTipoDocumento equals r.idTipoDocumento
-                                  select new
-                                  {
-                                      NombreCompleto = string.Join(" ", p.primerNombre, p.segundoNombre, p.primerApellido, p.segundoApellido).Trim(),
-                                      PrimerNombre = p.primerNombre,
-                                      SegundoNombre = p.segundoNombre,
-                                      PrimerApellido = p.primerApellido,
-                                      SegundoApellido = p.segundoNombre,
-                                      Direccion = p.direccion,
-                                      Documento = p.documento,
-                                      Telefono = p.telefono,
-                                      Correo = p.correo,
-                                      IdBarrio = p.idBarrio,
-                                      IdPerfil = u.idPerfil,
-                                      IdPersona = p.idPersona,
-                                      IdUsuario = u.idUsuario,
-                                      IdTipoDocumento = p.idTipoDocumento, 
-                                      TipoDocumento = r.descripcion
-                                  }).ToListAsync();
-
-            return Ok(usuarios);
+            var usuariosDetalle = await _usuarioService.GetUsuariosConDetalleAsync();
+            return Ok(usuariosDetalle);
         }
-
-
     }
 }
